@@ -2,8 +2,8 @@
     <div class="login">
         <h2>Connectez-vous</h2>
         <form @submit.prevent="login">
-            <input type="text" v-model="num_dossier" placeholder="Numéro de dossier" required>
-            <input type="password" v-model="motdepasse" placeholder="Mot de passe" required>
+            <input type="text" v-model="num_tel" placeholder="Numéro de telephone" required>
+            <input type="password" v-model="mdp" placeholder="Mot de passe" required>
             <button type="submit">Se connecter</button>
         </form>
         <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -15,15 +15,15 @@ import { ref } from "vue";
 import axios from "axios";
 
 // Champs du formulaire
-const num_dossier = ref("");
-const motdepasse = ref("");
+const num_tel = ref("");
+const mdp = ref("");
 const errorMessage = ref("");
 
 async function login() {
     try {
-        const res = await axios.post("http://localhost:8080/login", {
-            num_dossier: num_dossier.value,
-            motdepasse: motdepasse.value,
+        const res = await axios.post("http://localhost/eleve_maitre/api/login", {
+            num_primaire: num_tel.value,
+            password: mdp.value,
         }, {
             headers: {
                 "Content-Type": "application/json",
@@ -37,7 +37,7 @@ async function login() {
         }
     } catch (err) {
         console.error("Erreur login:", err);
-        errorMessage.value = "Une erreur est survenue. Vérifiez vos identifiants.";
+        errorMessage.value = "Une erreur est survenue";
     }
 }
 </script>

@@ -1,4 +1,5 @@
 <template>
+  <Login />
   <div class="layout">
     <!-- Profil gauche -->
     <aside class="profil">
@@ -53,7 +54,7 @@
 import { ref, onMounted } from "vue";
 import draggable from "vuedraggable";
 import axios from "axios";
-import Footer from "./components/footer.vue";
+import Login from "./components/login.vue";
 
 const ief = ref([]);
 
