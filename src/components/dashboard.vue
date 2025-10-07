@@ -1,12 +1,12 @@
 <template>
-<!--  <Login />-->
+  <!--  <Login />-->
   <div class="layout">
     <!-- Profil gauche -->
     <aside class="profil">
       <div class="text-center p-4">
         <div class="img mb-4">
           <img :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.firstname}+${user.lastname}`"
-               class="rounded-circle" width="80" height="80" />
+            class="rounded-circle" width="80" height="80" />
         </div>
         <h4 class="text-warning">Bienvenue {{ user.firstname }} </h4>
         <p><b>Nom :</b> {{ user.lastname }} </p>
@@ -32,7 +32,7 @@
           <template #item="{ element }">
             <div class="d-flex align-items-center p-2 border rounded mb-2 bg-light">
               <!-- <span class="me-2 text-muted">≡</span> -->
-              <img src="./assets/drag.png" width="15px">
+              <img src="../assets/drag.png" width="15px">
               <span class="ms-3">{{ element.name }}</span>
             </div>
           </template>
@@ -54,7 +54,6 @@
 import { ref, onMounted } from "vue";
 import draggable from "vuedraggable";
 import axios from "axios";
-import Login from "./components/login.vue";
 
 const ief = ref([]);
 
@@ -71,7 +70,7 @@ onMounted(async () => {
     }
     ief.value = listeIEF
     listeIEF.sort((a, b) =>
-        a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+      a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
     );
   } catch (err) {
     console.error("Erreur récupération IEF :", err);
@@ -86,6 +85,16 @@ const user = ref({
   birth: "22/10/2002",
   numdossier: "N123456789",
 });
+
+async function logout() {
+  try {
+    await axios.post("http://localhost/eleve_maitre/api/logout");
+    localStorage.removeItem("user");
+    router.push("/login");
+  } catch (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+  }
+}
 </script>
 
 <style>

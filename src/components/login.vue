@@ -13,6 +13,7 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
+import router from "../router/index";
 
 // Champs du formulaire
 const num_tel = ref("");
@@ -32,6 +33,8 @@ async function login() {
 
         if (res.data.status === "success") {
             console.log("Utilisateur connecté :", res.data.user);
+            localStorage.setItem("user", JSON.stringify(res.data.user));
+            await router.push('/dashboard');
         } else {
             errorMessage.value = res.data.message;
         }
@@ -53,7 +56,7 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 8px 4px rgba(0, 0, 0, 0.1);
     width: 300px;
-    margin: 80px auto;
+    margin: 160px auto;
     text-align: center;
 }
 

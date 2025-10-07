@@ -1,0 +1,10 @@
+diff a/package.json b/package.json	(rejected hunks)
+@@ -13,7 +13,7 @@
+     "bootstrap": "^5.3.8",
+     "bootstrap-vue-3": "^0.5.1",
+     "vue": "^3.5.21",
+-    "vue-router": "^4.5.1",
++    "vue-router": "^4.5.0",
+     "vuedraggable": "^4.1.0"
+   },
+   "devDependencies": {
