@@ -5,15 +5,17 @@
     <aside class="profil">
       <div class="text-center p-4">
         <div class="img mb-4">
-          <img :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.firstname}+${user.lastname}`"
+          <img :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
             class="rounded-circle" width="80" height="80" />
         </div>
-        <h4 class="text-warning">Bienvenue {{ user.firstname }} </h4>
-        <p><b>Nom :</b> {{ user.lastname }} </p>
+        <h4 class="text-warning">Bienvenue {{ user.prenom_eleve }} </h4>
+        <p><b>Nom :</b> {{ user.nom_eleve }} </p>
         <p><b>Email :</b> {{ user.email }} </p>
-        <p><b>Téléphone :</b> {{ user.phone }} </p>
-        <p><b>Date de naissance :</b> {{ user.birth }} </p>
-        <p><b>Dossier :</b> {{ user.numdossier }} </p>
+        <p><b>Téléphone :</b> {{ user.num_primaire }} </p>
+        <p><b>Date de naissance :</b> {{ user.date_naissance }} </p>
+        <p><b>Lieu de naissance :</b> {{ user.lieu_naissance }} </p>
+        <p><b>CNI :</b> {{ user.cni_eleve }} </p>
+        <p><b>Numero de table BAC :</b> {{ user.numero_table_bac }} </p>
         <b-button variant="danger" @click="logout" class="mt-2">
           Se déconnecter
         </b-button>
@@ -54,8 +56,10 @@
 import { ref, onMounted } from "vue";
 import draggable from "vuedraggable";
 import axios from "axios";
+import router from "../router/index";
 
 const ief = ref([]);
+const user = ref([]);
 
 onMounted(async () => {
   try {
@@ -77,23 +81,27 @@ onMounted(async () => {
   }
 });
 
-const user = ref({
-  firstname: "Mamadou",
-  lastname: "Sow",
-  email: "sowmamzo1002@gmail.com",
-  phone: "775125360",
-  birth: "22/10/2002",
-  numdossier: "N123456789",
-});
-
-async function logout() {
-  try {
-    await axios.post("http://localhost/eleve_maitre/api/logout");
-    localStorage.removeItem("user");
-    router.push("/login");
-  } catch (error) {
-    console.error("Erreur lors de la déconnexion :", error);
+onMounted(() => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    user.value = JSON.parse(storedUser);
+    console.log(user.value);
   }
+});
+console.log(user);
+
+// const user = ref({
+//   firstname: "Mamadou",
+//   lastname: "Sow",
+//   email: "sowmamzo1002@gmail.com",
+//   phone: "775125360",
+//   birth: "22/10/2002",
+//   numdossier: "N123456789",
+// });
+
+function logout() {
+  localStorage.removeItem("user");
+  router.push("/login");
 }
 </script>
 

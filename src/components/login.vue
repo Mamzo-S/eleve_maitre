@@ -32,7 +32,7 @@ async function login() {
         });
 
         if (res.data.status === "success") {
-            console.log("Utilisateur connecté :", res.data.user);
+            // console.log("Utilisateur connecté :", res.data.user);
             localStorage.setItem("user", JSON.stringify(res.data.user));
             await router.push('/dashboard');
         } else {
@@ -40,7 +40,7 @@ async function login() {
         }
     } catch (err) {
         console.error("Erreur login:", err);
-        errorMessage.value = "Une erreur est survenue";
+        errorMessage.value = "Identifiants invalides";
     }
 }
 </script>
