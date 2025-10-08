@@ -5,7 +5,8 @@
     <aside class="profil">
       <div class="text-center p-4">
         <div class="img mb-4">
-          <img :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
+          <img
+            :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
             class="rounded-circle" width="80" height="80" />
         </div>
         <h4 class="text-warning">Bienvenue {{ user.prenom_eleve }} </h4>
@@ -57,6 +58,7 @@ import { ref, onMounted } from "vue";
 import draggable from "vuedraggable";
 import axios from "axios";
 import router from "../router/index";
+import { toast } from "vue3-toastify";
 
 const ief = ref([]);
 const user = ref([]);
@@ -68,7 +70,8 @@ onMounted(async () => {
     for (let i = 0; i < res.data.iefs.length; i++) {
       const item = res.data.iefs[i]
       const nouvelIef = {
-        name: item.value_ief
+        name: item.value_ief,
+        code_ief: item.code_ief,
       }
       listeIEF.push(nouvelIef)
     }
@@ -78,30 +81,56 @@ onMounted(async () => {
     );
   } catch (err) {
     console.error("Erreur récupération IEF :", err);
+    toast.error("Une erreur est survenue.", {
+      position: "top-right",
+      autoClose: 3000,
+    });
   }
 });
 
-onMounted(() => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    user.value = JSON.parse(storedUser);
-    console.log(user.value);
-  }
-});
-console.log(user);
-
-// const user = ref({
-//   firstname: "Mamadou",
-//   lastname: "Sow",
-//   email: "sowmamzo1002@gmail.com",
-//   phone: "775125360",
-//   birth: "22/10/2002",
-//   numdossier: "N123456789",
-// });
+user.value = JSON.parse(localStorage.getItem("user"));
+// console.log(user);
 
 function logout() {
   localStorage.removeItem("user");
   router.push("/login");
+}
+
+async function saveChoices() {
+  try {
+    const data = ief.value.map((item, index) => ({
+      id_eleve: user.value.id_eleve,
+      code_ief: item.code_ief,
+      rang: index + 1,
+    }));
+
+    console.log("Données envoyées :", data);
+
+    const res = await axios.post("http://localhost/eleve_maitre/api/choix", data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if ( res.data.status === "success") {
+      toast.success("Choix enregistrés avec succès !", {
+        position: "top-right",
+        autoClose: 3000
+      });
+    } else if ( res.data.status === "error") {
+      toast.error("Erreur lors de l'enregistrement des choix", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+
+  } catch (err) {
+    console.error("Erreur lors de l’enregistrement :", err);
+    toast.error("Une erreur est survenue. Veuillez réessayer.", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+  }
 }
 </script>
 
@@ -114,20 +143,20 @@ function logout() {
 
 .profil {
   width: 30%;
-  background-color: #00481e;
+  background-color: #042b56;
   color: white;
   position: sticky;
   top: 0;
   height: 100vh;
   overflow-y: auto;
-  padding: 35px;
+  padding: 20px;
   margin: 20px 0;
 }
 
 .content {
   flex: 1;
   padding: 20px;
-  background-color: #448fbd;
+  background-color: #8ae6ffba;
   padding: 10px;
   margin: 20px 0;
   height: 100vh;

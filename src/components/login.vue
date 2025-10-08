@@ -73,6 +73,7 @@ body {
 .login button {
     width: 100%;
     padding: 10px;
+    margin: 20px 0;
     background: #007bff;
     border: none;
     border-radius: 5px;

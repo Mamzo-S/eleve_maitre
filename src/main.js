@@ -2,6 +2,8 @@ import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
 import router from './router/index'
+import Toast from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
@@ -13,4 +15,5 @@ const app = createApp(App)
 app.use(BootstrapVue3)
 
 app.use(router);
+app.use(Toast);
 app.mount('#app')
