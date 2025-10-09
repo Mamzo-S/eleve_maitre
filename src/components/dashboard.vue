@@ -1,8 +1,12 @@
 <template>
-  <!--  <Login />-->
+  <div class="mobile-topbar d-md-none text-start p-1 d-flex">
+    <img :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
+      class="rounded-circle profile-icone" width="60" height="60" @click="toggleProfile" />
+    <p class="name"><b> {{ user.prenom_eleve + user.nom_eleve }} </b></p>
+  </div>
   <div class="layout">
     <!-- Profil gauche -->
-    <aside class="profil">
+    <aside class="profil" v-show="!isMobile || (isMobile && showProfile)">
       <div class="text-center p-4">
         <div class="img mb-4">
           <img
@@ -10,31 +14,29 @@
             class="rounded-circle" width="80" height="80" />
         </div>
         <h4 class="text-warning">Bienvenue {{ user.prenom_eleve }} </h4>
-        <p><b>Nom :</b> {{ user.nom_eleve }} </p>
-        <p><b>Email :</b> {{ user.email }} </p>
-        <p><b>Téléphone :</b> {{ user.num_primaire }} </p>
-        <p><b>Date de naissance :</b> {{ user.date_naissance }} </p>
-        <p><b>Lieu de naissance :</b> {{ user.lieu_naissance }} </p>
-        <p><b>CNI :</b> {{ user.cni_eleve }} </p>
-        <p><b>Numero de table BAC :</b> {{ user.numero_table_bac }} </p>
-        <b-button variant="danger" @click="logout" class="mt-2">
+        <p><b>Nom :</b> <span> {{ user.nom_eleve }} </span></p>
+        <p><b>Email :</b> <span> {{ user.email }} </span></p>
+        <p><b>Téléphone :</b> <span> {{ user.num_primaire }} </span></p>
+        <p><b>Date de naissance :</b> <span> {{ user.date_naissance }} </span></p>
+        <p><b>Lieu de naissance :</b> <span> {{ user.lieu_naissance }} </span></p>
+        <p><b>CNI :</b> <span> {{ user.cni_eleve }} </span></p>
+        <p><b>Numero de table BAC :</b> <span> {{ user.numero_table_bac }} </span></p>
+        <b-button variant="danger" @click="logout" class="mt-3">
           Se déconnecter
         </b-button>
       </div>
     </aside>
 
     <!-- Liste IEF droite -->
-    <main class="content">
-      <!-- <b-card> -->
-      <div class="align-items-center mb-4 mt-5">
+    <main class="content" v-show="!isMobile || (isMobile && !showProfile)">
+      <div class="align-items-center mb-4 mt-4">
         <h2 class="mt-2">Veuillez ordonner votre liste de choix d'IEF</h2>
       </div>
 
       <div class="ief-scroll">
         <draggable v-model="ief" item-key="id">
           <template #item="{ element }">
-            <div class="d-flex align-items-center p-2 border rounded mb-2 bg-light">
-              <!-- <span class="me-2 text-muted">≡</span> -->
+            <div class="d-flex align-items-center p-2 border rounded mb-2 ief">
               <img src="../assets/drag.png" width="15px">
               <span class="ms-3">{{ element.name }}</span>
             </div>
@@ -47,14 +49,16 @@
           Enregistrer
         </b-button>
       </div>
-      <!-- </b-card> -->
     </main>
   </div>
-  <!-- <Footer /> -->
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
+
+const showProfile = ref(false);
+const toggleProfile = () => (showProfile.value = !showProfile.value);
+
 import draggable from "vuedraggable";
 import axios from "axios";
 import router from "../router/index";
@@ -62,6 +66,16 @@ import { toast } from "vue3-toastify";
 
 const ief = ref([]);
 const user = ref([]);
+
+const isMobile = ref(false);
+
+onMounted(() => {
+  const checkWidth = () => {
+    isMobile.value = window.innerWidth <= 768;
+  };
+  checkWidth();
+  window.addEventListener("resize", checkWidth);
+});
 
 onMounted(async () => {
   try {
@@ -112,12 +126,12 @@ async function saveChoices() {
       },
     });
 
-    if ( res.data.status === "success") {
+    if (res.data.status === "success") {
       toast.success("Choix enregistrés avec succès !", {
         position: "top-right",
         autoClose: 3000
       });
-    } else if ( res.data.status === "error") {
+    } else if (res.data.status === "error") {
       toast.error("Erreur lors de l'enregistrement des choix", {
         position: "top-right",
         autoClose: 3000,
@@ -149,13 +163,12 @@ async function saveChoices() {
   top: 0;
   height: 100vh;
   overflow-y: auto;
-  padding: 20px;
+  padding: 16px;
   margin: 20px 0;
 }
 
 .content {
   flex: 1;
-  padding: 20px;
   background-color: #8ae6ffba;
   padding: 10px;
   margin: 20px 0;
@@ -165,57 +178,94 @@ async function saveChoices() {
 .ief-scroll {
   max-height: calc(100vh - 200px);
   overflow-y: auto;
-  margin-left: 32%;
-  padding-right: 32%;
+  margin-left: 28%;
+  padding-right: 28%;
 }
+
+.content .ief{
+    background-color: white;
+  }
 
 p {
   text-align: left;
 }
 
 /* ---------- RESPONSIVE---------- */
+
+.profile-icon {
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .layout {
-    display: flex;
-    width: 100%;
     flex-direction: column;
-    padding: 12px;
-  }
-
-  .profil {
-    position: static;
-    top: auto;
-    width: 100%;
-    min-height: 350px;
-    margin: 2;
-    padding: 16px;
-    border-radius: 8px;
+    height: auto;
   }
 
   .content {
-    /* width: 100%; */
+    width: 100%;
+    height: auto;
     margin: 0;
-    padding: 12px;
+    padding: 16px;
     background-color: transparent;
   }
 
-  .ief-scroll {
-    margin-left: 10px;
-    max-height: calc(60vh);
-    padding-right: 0;
-  }
-
   .content h2 {
-    font-size: 1.1rem;
+    color: #0064cf;
+    /* margin-top: 40px; */
   }
 
-  .profil .img img {
-    width: 64px;
-    height: 64px;
+  .ief-scroll {
+    max-height: calc(70vh - 100px);
+    overflow-y: auto;
+    margin-left: 20%;
+    padding-right: 20%;
   }
 
-  .button-save {
-    padding-bottom: 60px;
+  .content .ief{
+    background-color: #8acaff80;
+  }
+
+  .profil {
+    width: 100%;
+    height: auto;
+    margin: 30px 0;
+    padding: 16px;
+    background-color: transparent;
+    color: black;
+  }
+
+  .name {
+    font-size: 1.5rem;
+    margin: 35px 10px;
+  }
+
+  .profil span {
+    color: #0064cf;
+    font-weight: 600;
+  }
+
+  .profil p {
+    font-size: large;
+  }
+
+  .profil[v-show="true"] {
+    display: block;
+  }
+
+  .content[v-show="true"] {
+    display: block;
+  }
+
+  .mobile-topbar {
+    background-color: #0064cf;
+    color: white;
+  }
+
+  .profile-icone {
+    cursor: pointer;
+    border-radius: 50%;
+    margin: 25px 5px;
   }
 }
 </style>
