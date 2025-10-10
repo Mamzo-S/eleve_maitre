@@ -91,4 +91,10 @@ body {
     color: red;
     font-size: 14px;
 }
+
+@media (max-width: 768px) {
+    .login {
+        margin-top: 70%;
+    }
+}
 </style>

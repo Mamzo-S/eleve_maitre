@@ -1,8 +1,12 @@
 <template>
-  <div class="mobile-topbar d-md-none text-start p-1 d-flex">
-    <img :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
-      class="rounded-circle profile-icone" width="60" height="60" @click="toggleProfile" />
-    <p class="name"><b> {{ user.prenom_eleve + user.nom_eleve }} </b></p>
+  <div class="mobile-topbar d-md-none text-start mt-2 d-flex align-items-center">
+    <img v-if="!showProfile"
+      :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
+      class="rounded-circle profile-icone" width="60" height="60" @click="goToProfile" />
+    <p class="name"><b>{{ user.prenom_eleve + ' ' + user.nom_eleve }}</b></p>
+
+    <img v-if="showProfile" src="../assets/retourner1.png" class="retour ms-auto" width="45" height="45"
+      @click="goBack" />
   </div>
   <div class="layout">
     <!-- Profil gauche -->
@@ -36,7 +40,7 @@
       <div class="ief-scroll">
         <draggable v-model="ief" item-key="id">
           <template #item="{ element }">
-            <div class="d-flex align-items-center p-2 border rounded mb-2 ief">
+            <div class="d-flex align-items-center p-3 border rounded m-2 ief">
               <img src="../assets/drag.png" width="15px">
               <span class="ms-3">{{ element.name }}</span>
             </div>
@@ -44,7 +48,7 @@
         </draggable>
       </div>
 
-      <div class="mt-3 button-save">
+      <div class="button-save mt-4">
         <b-button variant="primary" @click="saveChoices">
           Enregistrer
         </b-button>
@@ -54,15 +58,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-
-const showProfile = ref(false);
-const toggleProfile = () => (showProfile.value = !showProfile.value);
-
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import draggable from "vuedraggable";
 import axios from "axios";
 import router from "../router/index";
 import { toast } from "vue3-toastify";
+
+const showProfile = ref(false);
+
+function goToProfile() {
+  if (!showProfile.value) showProfile.value = true;
+}
+
+function goBack() {
+  showProfile.value = false;
+}
 
 const ief = ref([]);
 const user = ref([]);
@@ -105,10 +115,34 @@ onMounted(async () => {
 user.value = JSON.parse(localStorage.getItem("user"));
 // console.log(user);
 
+let inactivityTimer = null;
+
 function logout() {
   localStorage.removeItem("user");
+  clearTimeout(inactivityTimer);
   router.push("/login");
 }
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => {
+    logout();
+  }, 300000);
+}
+
+onMounted(() => {
+  window.addEventListener("mousemove", resetInactivityTimer);
+  window.addEventListener("keypress", resetInactivityTimer);
+  window.addEventListener("click", resetInactivityTimer);
+  resetInactivityTimer();
+});
+
+onBeforeUnmount(() => {
+  clearTimeout(inactivityTimer);
+  window.removeEventListener("mousemove", resetInactivityTimer);
+  window.removeEventListener("keypress", resetInactivityTimer);
+  window.removeEventListener("click", resetInactivityTimer);
+});
 
 async function saveChoices() {
   try {
@@ -148,7 +182,7 @@ async function saveChoices() {
 }
 </script>
 
-<style>
+<style scoped>
 .layout {
   display: flex;
   height: 90vh;
@@ -157,7 +191,7 @@ async function saveChoices() {
 
 .profil {
   width: 30%;
-  background-color: #042b56;
+  background-color: #0064cf;
   color: white;
   position: sticky;
   top: 0;
@@ -169,7 +203,7 @@ async function saveChoices() {
 
 .content {
   flex: 1;
-  background-color: #8ae6ffba;
+  background-color: #ffffff;
   padding: 10px;
   margin: 20px 0;
   height: 100vh;
@@ -182,9 +216,9 @@ async function saveChoices() {
   padding-right: 28%;
 }
 
-.content .ief{
-    background-color: white;
-  }
+.content .ief {
+  background-color: #8acaff80;
+}
 
 p {
   text-align: left;
@@ -192,14 +226,24 @@ p {
 
 /* ---------- RESPONSIVE---------- */
 
-.profile-icon {
-  cursor: pointer;
-}
-
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
     height: auto;
+  }
+
+  .retour {
+    margin-right: 10px;
+    cursor: pointer;
+  }
+
+  .mobile-topbar {
+    background-color: #0064cf;
+    color: white;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .content {
@@ -218,12 +262,33 @@ p {
   .ief-scroll {
     max-height: calc(70vh - 100px);
     overflow-y: auto;
-    margin-left: 20%;
-    padding-right: 20%;
+    margin-left: 10%;
+    padding-right: 10%;
   }
 
-  .content .ief{
+  .ief-scroll::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .ief-scroll::-webkit-scrollbar-track {
+    background: #d6eaff;
+    /* couleur de fond du rail */
+    border-radius: 10px;
+  }
+
+  .ief-scroll::-webkit-scrollbar-thumb {
+    background-color: #0064cf;
+    /* couleur du curseur */
+    border-radius: 10px;
+  }
+
+  .content .ief {
     background-color: #8acaff80;
+  }
+
+  .content .ief span {
+    font-size: large;
+    font-weight: 600;
   }
 
   .profil {
@@ -266,6 +331,17 @@ p {
     cursor: pointer;
     border-radius: 50%;
     margin: 25px 5px;
+  }
+
+  .button-save {
+    width: 50%;
+    padding: 10px;
+    margin: 20px auto;
+    background: #007bff;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
   }
 }
 </style>
