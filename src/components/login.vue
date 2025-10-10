@@ -22,7 +22,7 @@ const errorMessage = ref("");
 
 async function login() {
     try {
-        const res = await axios.post("http://localhost/eleve_maitre/api/login", {
+        const res = await axios.post("http://localhost:8080/api/login", {
             num_primaire: num_tel.value,
             password: mdp.value,
         }, {
