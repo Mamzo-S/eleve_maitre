@@ -1,83 +1,116 @@
 <template>
-  <div class="mobile-topbar d-md-none text-start mt-2 d-flex align-items-center">
-    <img v-if="!showProfile"
-      :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
-      class="rounded-circle profile-icone" width="60" height="60" @click="goToProfile" />
-    <p class="name"><b>{{ user.prenom_eleve + ' ' + user.nom_eleve }}</b></p>
-
-    <img v-if="showProfile" src="../assets/retourner1.png" class="retour ms-auto" width="45" height="45"
-      @click="goBack" />
-  </div>
-  <div class="layout">
-    <!-- Profil gauche -->
-    <aside class="profil" v-show="!isMobile || (isMobile && showProfile)">
-      <div class="text-center p-4">
-        <div class="img mb-4">
-          <img
-            :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
-            class="rounded-circle" width="80" height="80" />
-        </div>
-        <h4 class="text-warning">Bienvenue {{ user.prenom_eleve }} </h4>
-        <p><b>Nom :</b> <span> {{ user.nom_eleve }} </span></p>
-        <p><b>Email :</b> <span> {{ user.email }} </span></p>
-        <p><b>Téléphone :</b> <span> {{ user.num_primaire }} </span></p>
-        <p><b>Date de naissance :</b> <span> {{ user.date_naissance }} </span></p>
-        <p><b>Lieu de naissance :</b> <span> {{ user.lieu_naissance }} </span></p>
-        <p><b>CNI :</b> <span> {{ user.cni_eleve }} </span></p>
-        <p><b>Numero de table BAC :</b> <span> {{ user.numero_table_bac }} </span></p>
-        <b-button variant="danger" @click="logout" class="mt-3">
-          Se déconnecter
-        </b-button>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ 'show': showSidebar }">
+      <div class="sidebar-header">
+        <img :src="`https://ui-avatars.com/api?background=0D8ABC&color=fff&name=${user.prenom_eleve}+${user.nom_eleve}`"
+          class="profile-image" alt="Profile" />
+        <h3 class="user-name">{{ user.prenom_eleve }} {{ user.nom_eleve }}</h3>
       </div>
+
+      <nav class="sidebar-nav">
+        <router-link to="/dashboard" class="nav-item" active-class="active">
+          <i class="fas fa-list-ol"></i>
+          Faire mes choix
+        </router-link>
+        <router-link to="/mes-choix" class="nav-item" active-class="active">
+          <i class="fas fa-clipboard-list"></i>
+          Voir mes choix
+        </router-link>
+      </nav>
+
+      <div class="user-info">
+        <div class="info-item">
+          <span class="label">Email :</span>
+          <span class="value">{{ user.email }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Téléphone :</span>
+          <span class="value">{{ user.num_primaire }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Date de naissance :</span>
+          <span class="value">{{ user.date_naissance }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">CNI :</span>
+          <span class="value">{{ user.cni_eleve }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">N° BAC :</span>
+          <span class="value">{{ user.numero_table_bac }}</span>
+        </div>
+      </div>
+
+      <button @click="logout" class="logout-button">
+        <i class="fas fa-sign-out-alt"></i>
+        Se déconnecter
+      </button>
     </aside>
 
-    <!-- Liste IEF droite -->
-    <main class="content" v-show="!isMobile || (isMobile && !showProfile)">
-      <div class="align-items-center mb-4 mt-4">
-        <h2 class="mt-2">Veuillez ordonner votre liste de choix d'IEF</h2>
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+      <button @click="toggleSidebar" class="menu-button">
+        <i class="fas fa-bars"></i>
+      </button>
+      <h2 class="page-title">Faire mes choix</h2>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-header">
+        <h1>
+          <i class="fas fa-list-ol"></i>
+          Ordonnez vos choix d'IEF
+        </h1>
+        <p class="subtitle">Glissez et déposez les éléments pour définir vos préférences</p>
       </div>
 
-      <div class="ief-scroll">
-        <draggable v-model="ief" item-key="id">
-          <template #item="{ element }">
-            <div class="d-flex align-items-center p-3 border rounded m-2 ief">
-              <img src="../assets/drag.png" width="15px">
-              <span class="ms-3">{{ element.name }}</span>
+      <div class="choices-container">
+        <draggable v-model="ief" item-key="id" class="choices-list" handle=".handle">
+          <template #item="{ element, index }">
+            <div class="choice-item">
+              <div class="handle">
+                <i class="fas fa-grip-vertical"></i>
+              </div>
+              <div class="choice-content">
+                <div class="choice-number">{{ index + 1 }}</div>
+                <div class="choice-name">{{ element.name }}</div>
+              </div>
             </div>
           </template>
         </draggable>
-      </div>
 
-      <div class="button-save mt-4">
-        <b-button variant="primary" @click="saveChoices">
-          Enregistrer
-        </b-button>
+        <div class="action-buttons">
+          <button @click="saveChoices" class="save-button">
+            <i class="fas fa-save"></i>
+            Enregistrer mes choix
+          </button>
+        </div>
       </div>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted } from "vue";
+
+const showProfile = ref(false);
+const toggleProfile = () => (showProfile.value = !showProfile.value);
+
 import draggable from "vuedraggable";
 import axios from "axios";
 import router from "../router/index";
 import { toast } from "vue3-toastify";
 
-const showProfile = ref(false);
-
-function goToProfile() {
-  if (!showProfile.value) showProfile.value = true;
-}
-
-function goBack() {
-  showProfile.value = false;
-}
-
 const ief = ref([]);
 const user = ref([]);
 
 const isMobile = ref(false);
+const showSidebar = ref(false);
+const toggleSidebar = () => {
+  showSidebar.value = !showSidebar.value;
+};
 
 onMounted(() => {
   const checkWidth = () => {
@@ -115,34 +148,10 @@ onMounted(async () => {
 user.value = JSON.parse(localStorage.getItem("user"));
 // console.log(user);
 
-let inactivityTimer = null;
-
 function logout() {
   localStorage.removeItem("user");
-  clearTimeout(inactivityTimer);
   router.push("/login");
 }
-
-function resetInactivityTimer() {
-  clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(() => {
-    logout();
-  }, 300000);
-}
-
-onMounted(() => {
-  window.addEventListener("mousemove", resetInactivityTimer);
-  window.addEventListener("keypress", resetInactivityTimer);
-  window.addEventListener("click", resetInactivityTimer);
-  resetInactivityTimer();
-});
-
-onBeforeUnmount(() => {
-  clearTimeout(inactivityTimer);
-  window.removeEventListener("mousemove", resetInactivityTimer);
-  window.removeEventListener("keypress", resetInactivityTimer);
-  window.removeEventListener("click", resetInactivityTimer);
-});
 
 async function saveChoices() {
   try {
@@ -183,165 +192,231 @@ async function saveChoices() {
 </script>
 
 <style scoped>
-.layout {
+.dashboard-container {
+  min-height: 100vh;
+  background: #f8f9fa;
   display: flex;
-  height: 90vh;
-  width: 100%;
 }
 
-.profil {
-  width: 30%;
-  background-color: #0064cf;
-  color: white;
-  position: sticky;
+.sidebar {
+  width: 300px;
+  background: white;
+  border-right: 1px solid #e9ecef;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  left: 0;
   top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  padding: 16px;
-  margin: 20px 0;
 }
 
-.content {
-  flex: 1;
-  background-color: #ffffff;
-  padding: 10px;
-  margin: 20px 0;
-  height: 100vh;
+.sidebar-header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-.ief-scroll {
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-  margin-left: 28%;
-  padding-right: 28%;
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 15px;
 }
 
-.content .ief {
-  background-color: #8acaff80;
+.user-name {
+  font-size: 18px;
+  color: #333;
+  margin: 0;
 }
 
-p {
-  text-align: left;
+.sidebar-nav {
+  margin-bottom: 30px;
 }
 
-/* ---------- RESPONSIVE---------- */
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  color: #666;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.nav-item i {
+  margin-right: 10px;
+}
+
+.nav-item:hover, .nav-item.active {
+  background: #007bff;
+  color: white;
+}
+
+.user-info {
+  flex-grow: 1;
+  border-top: 1px solid #e9ecef;
+  padding-top: 20px;
+}
+
+.info-item {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.info-item .label {
+  color: #666;
+  margin-right: 8px;
+}
+
+.logout-button {
+  width: 100%;
+  padding: 12px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.main-content {
+  flex-grow: 1;
+  margin-left: 300px;
+  padding: 30px;
+}
+
+.content-header {
+  margin-bottom: 30px;
+}
+
+.content-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #666;
+  margin: 0;
+}
+
+.choices-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.choices-list {
+  margin-bottom: 20px;
+}
+
+.choice-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.choice-item:hover {
+  border-color: #007bff;
+  transform: translateX(5px);
+}
+
+.handle {
+  color: #007bff;
+  padding: 0 15px;
+  cursor: grab;
+}
+
+.choice-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.choice-number {
+  background: #007bff;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.save-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  margin: 0 auto;
+}
+
+.mobile-header {
+  display: none;
+}
 
 @media (max-width: 768px) {
-  .layout {
-    flex-direction: column;
-    height: auto;
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
   }
 
-  .retour {
-    margin-right: 10px;
-    cursor: pointer;
+  .sidebar.show {
+    transform: translateX(0);
   }
 
-  .mobile-topbar {
-    background-color: #0064cf;
-    color: white;
-    padding: 8px 12px;
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .mobile-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 15px;
+    padding: 15px;
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 
-  .content {
-    width: 100%;
-    height: auto;
-    margin: 0;
-    padding: 16px;
-    background-color: transparent;
-  }
-
-  .content h2 {
-    color: #0064cf;
-    /* margin-top: 40px; */
-  }
-
-  .ief-scroll {
-    max-height: calc(70vh - 100px);
-    overflow-y: auto;
-    margin-left: 10%;
-    padding-right: 10%;
-  }
-
-  .ief-scroll::-webkit-scrollbar {
-    width: 10px;
-  }
-
-  .ief-scroll::-webkit-scrollbar-track {
-    background: #d6eaff;
-    /* couleur de fond du rail */
-    border-radius: 10px;
-  }
-
-  .ief-scroll::-webkit-scrollbar-thumb {
-    background-color: #0064cf;
-    /* couleur du curseur */
-    border-radius: 10px;
-  }
-
-  .content .ief {
-    background-color: #8acaff80;
-  }
-
-  .content .ief span {
-    font-size: large;
-    font-weight: 600;
-  }
-
-  .profil {
-    width: 100%;
-    height: auto;
-    margin: 30px 0;
-    padding: 16px;
-    background-color: transparent;
-    color: black;
-  }
-
-  .name {
-    font-size: 1.5rem;
-    margin: 35px 10px;
-  }
-
-  .profil span {
-    color: #0064cf;
-    font-weight: 600;
-  }
-
-  .profil p {
-    font-size: large;
-  }
-
-  .profil[v-show="true"] {
-    display: block;
-  }
-
-  .content[v-show="true"] {
-    display: block;
-  }
-
-  .mobile-topbar {
-    background-color: #0064cf;
-    color: white;
-  }
-
-  .profile-icone {
-    cursor: pointer;
-    border-radius: 50%;
-    margin: 25px 5px;
-  }
-
-  .button-save {
-    width: 50%;
-    padding: 10px;
-    margin: 20px auto;
-    background: #007bff;
+  .menu-button {
+    background: none;
     border: none;
-    border-radius: 5px;
-    color: white;
+    font-size: 20px;
+    color: #007bff;
+    padding: 5px;
     cursor: pointer;
+  }
+
+  .page-title {
+    margin: 0;
+    font-size: 18px;
   }
 }
 </style>
