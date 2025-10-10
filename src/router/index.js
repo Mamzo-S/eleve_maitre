@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import login from "../components/login.vue";
 import dashboard from "../components/dashboard.vue";
+import mesChoix from "../components/mes-choix.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -15,6 +16,12 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: dashboard,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/mes-choix',
+      name: 'mes-choix',
+      component: mesChoix,
       meta: { requiresAuth: true },
     },
     {
